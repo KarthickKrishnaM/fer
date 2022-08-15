@@ -38,6 +38,7 @@ from typing import Sequence, Tuple, Union
 
 import cv2
 import numpy as np
+import retinaface
 
 from tensorflow.keras.models import load_model
 
@@ -64,7 +65,7 @@ class FER(object):
     def __init__(
         self,
         cascade_file: str = None,
-        mtcnn=False,
+        retina=False,
         tfserving: bool = False,
         scale_factor: float = 1.1,
         min_face_size: int = 50,
@@ -88,15 +89,15 @@ class FER(object):
         if cascade_file is None:
             cascade_file = cv2.data.haarcascades + 'haarcascade_frontalface_default.xml'
 
-        if mtcnn:
+        if retina:
             try:
-                from mtcnn.mtcnn import MTCNN
+                from retinaface import RetinaFace
             except ImportError:
                 raise Exception(
-                    "MTCNN not installed, install it with pip install mtcnn"
+                    "RetinaFace not installed, install it with pip install retinaface"
                 )
-            self.__face_detector = "mtcnn"
-            self._mtcnn = MTCNN()
+            self.__face_detector = "retina"
+            self.__retina = RetinaFace
         else:
             self.__face_detector = cv2.CascadeClassifier(cascade_file)
 
@@ -184,10 +185,12 @@ class FER(object):
                 flags=cv2.CASCADE_SCALE_IMAGE,
                 minSize=(self.__min_face_size, self.__min_face_size),
             )
-        elif self.__face_detector == "mtcnn":
-            results = self._mtcnn.detect_faces(img)
-            faces = [x["box"] for x in results]
-
+        elif self.__face_detector == "retina":
+            obj=self.__retina.detect_faces(img)
+            faces = []
+            for key in obj:
+              face = obj[key]['facial_area']
+              faces.append[[face[0], face[1], face[2]-face[0], face[3]-face[1]]]
         return faces
 
     @staticmethod
