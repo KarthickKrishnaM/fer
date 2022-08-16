@@ -190,7 +190,7 @@ class FER(object):
             faces = []
             if type(obj) is dict:
                 for key in obj.keys():
-                face = obj[key]['facial_area']
+                    face = obj[key]['facial_area']
                 faces.append([face[0], face[1], face[2]-face[0], face[3]-face[1]])
         return faces
 
