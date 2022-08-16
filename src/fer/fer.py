@@ -188,9 +188,10 @@ class FER(object):
         elif self.__face_detector == "retina":
             obj=self.__retina.detect_faces(img)
             faces = []
-            for key in obj.keys():
-              face = obj[key]['facial_area']
-              faces.append([face[0], face[1], face[2]-face[0], face[3]-face[1]])
+            if type(obj) is dict:
+                for key in obj.keys():
+                face = obj[key]['facial_area']
+                faces.append([face[0], face[1], face[2]-face[0], face[3]-face[1]])
         return faces
 
     @staticmethod
